@@ -3,6 +3,7 @@ const { createServer } = require('node:http');
 const { join } = require('node:path');
 const { Server } = require('socket.io');
 
+const { generateMessage } = require('./utils/message');
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
@@ -14,38 +15,22 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   console.log('a user connected');
 
-  //? Boradcasting
-  //? to execute below 2 events, you must emit ('createMessage') message from client side.
-  socket.on('createMessage', (message) => {
+  socket.emit(
+    'newMessage',
+    generateMessage('Admin', 'Welocome to the chat app!')
+  );
+
+  socket.broadcast.emit(
+    'newMessage',
+    generateMessage('Admin', 'New User Joined!')
+  );
+
+  socket.on('createMessage', (message, callback) => {
     console.log('createMessage', message);
-    //* 1) In this case if user send message to server, so server resend this msg to all connected user including (sender)
-    io.emit('newMessage', {
-      from: message.from,
-      text: message.text,
-      createdAt: new Date().getTime(),
-    });
 
-    //* 2) In this case if user send message to server, so server resend this msg to all connected user excluding (sender)
-    socket.broadcast.emit('newMessage', {
-      from: message.from,
-      text: message.text,
-      createdAt: new Date().getTime(),
-    });
-  });
+    io.emit('newMessage', generateMessage(message.from, message.text));
 
-  //? Send Message from admin to new entered user.
-  //* 1)
-  socket.emit('newMessage', {
-    from: 'Admin',
-    text: 'Welcome to the chat app',
-    createdAt: new Date().getTime(),
-  });
-
-  //? Send All other users that a new user joined.
-  socket.broadcast.emit('newMessage', {
-    from: 'Admin',
-    text: 'New User Joined!',
-    createdAt: new Date().getTime(),
+    callback('This is the server:');
   });
 
   socket.on('disconnect', () => {

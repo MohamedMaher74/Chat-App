@@ -1,0 +1,14 @@
+// install mocha
+npm i expect mocha --save -dev
+
+// then create messages.test.js
+
+// edit in package.json
+"scripts": {
+    "start": "nodemon server/server.js",
+    "test": "jest",
+    "test-watch": "nodemon --exec \"npm test\""
+  }
+
+// run test
+npm run test-watch

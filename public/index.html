@@ -22,6 +22,17 @@
       socket.on('newMessage', function (message) {
         console.log('newMessage', message);
       });
+
+      socket.emit(
+        'createMessage',
+        {
+          from: 'client',
+          text: 'Hello server',
+        },
+        (message) => {
+          console.log('Got it.', message);
+        }
+      );
     </script>
   </body>
 </html>
